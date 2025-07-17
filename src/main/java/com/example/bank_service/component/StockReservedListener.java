@@ -1,11 +1,13 @@
 package com.example.bank_service.component;
 
 import com.example.bank_service.config.RabbitMQConfig;
+import com.example.bank_service.dto.TransactionRequestDTO;
+import com.example.bank_service.dto.TransactionResponseDTO;
+import com.example.bank_service.service.BankService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.events.OrderCreatedEvent;
 import org.example.events.OrderFailedEvent;
-import org.example.events.PaymentCompletedEvent;
-import org.example.events.StockReservedEvent;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
@@ -18,38 +20,31 @@ import java.util.UUID;
 public class StockReservedListener {
 
     private final RabbitTemplate rabbitTemplate;
+    private final BankService bankService;
 
-    @RabbitListener(queues = RabbitMQConfig.STOCK_RESERVED_QUEUE)
-    public void onStockReserved(StockReservedEvent event) {
-        System.out.println("💳 Received StockReservedEvent for order: " + event.getOrderId());
-
-        // Simulate payment logic
-        boolean paymentSuccess = mockChargeCustomer(event.getOrderId());
-
-        if (paymentSuccess) {
-            PaymentCompletedEvent paymentEvent = new PaymentCompletedEvent(
-                    event.getOrderId(),
-                    UUID.randomUUID().toString()
-            );
-
+    @RabbitListener(queues = RabbitMQConfig.COUPON_APPLIED_QUEUE)
+    public void onStockReserved(OrderCreatedEvent event) {
+        try {
+            TransactionRequestDTO requestDTO= TransactionRequestDTO.builder()
+                    .cardNumber("123456789")
+                    .amount(event.getTotalAmount())
+                    .build();
+            TransactionResponseDTO responseDTO = bankService.withdraw(requestDTO);
+            event.setTransactionId(responseDTO.getTransactionId());
             rabbitTemplate.convertAndSend(
                     RabbitMQConfig.PAYMENT_COMPLETED_QUEUE,
-                    paymentEvent
+                    event
             );
-        } else {
+        } catch (RuntimeException e) {
             OrderFailedEvent fail = new OrderFailedEvent(
                     event.getOrderId(),
-                    "Payment failed"
+                    "Payment failed",
+                    event.getTransactionId()
             );
-
-            rabbitTemplate.convertAndSend("order.failed","", fail);
+            rabbitTemplate.convertAndSend("order.failed", "", fail);
         }
     }
 
-    private boolean mockChargeCustomer(Long orderId) {
-        // Simulate success/failure (e.g., 90% success)
-        return Math.random() > 0.1;
-    }
 
     @RabbitListener(queues = "bank.order.failed")
     public void onOrderFailed(OrderFailedEvent event) {

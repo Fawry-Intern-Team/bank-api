@@ -1,6 +1,7 @@
 package com.example.bank_service.entity;
 
 import com.example.bank_service.enums.TransactionType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,10 +19,11 @@ import java.util.UUID;
 @Builder
 public class Transaction {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long transactionId;
+    @GeneratedValue
+    private UUID transactionId;
+    @JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "card_number")
+    @JoinColumn(name = "account_id")
     private Account account;
 
     private LocalDateTime createdAt;

@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitMQConfig {
-    public static final String STOCK_RESERVED_QUEUE = "stock.reserved.queue";
+    public static final String COUPON_APPLIED_QUEUE = "coupon.applied.queue";
     public static final String PAYMENT_COMPLETED_QUEUE = "payment.completed.queue";
     public static final String ORDER_FAILED_QUEUE = "bank.order.failed";
     @Bean
@@ -30,8 +30,8 @@ public class RabbitMQConfig {
         return BindingBuilder.bind(orderFailedQueue()).to(orderFailedExchange);
     }
     @Bean
-    public Queue stockReservedQueue() {
-        return new Queue(STOCK_RESERVED_QUEUE);
+    public Queue couponAppliedQueue() {
+        return new Queue(COUPON_APPLIED_QUEUE);
     }
 
     @Bean

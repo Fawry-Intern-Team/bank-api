@@ -1,7 +1,6 @@
 package com.example.bank_service.controller;
 
-import com.example.bank_service.dto.AccountDTO;
-import com.example.bank_service.dto.TransactionDTO;
+import com.example.bank_service.dto.*;
 import com.example.bank_service.service.BankService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,47 +22,51 @@ public class BankController {
     private final BankService bankService;
 
     @PostMapping
-    public ResponseEntity<AccountDTO> create(@Valid @RequestBody AccountDTO dto) {
+    public ResponseEntity<AccountResponseDTO> create(@Valid @RequestBody AccountRequestDTO dto) {
         return ResponseEntity.ok(bankService.createAccount(dto));
     }
 
     @GetMapping
-    public Page<AccountDTO> getAllAccounts(
+    public Page<AccountResponseDTO> getAllAccounts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
         return bankService.getAllAccounts(PageRequest.of(page, size));
     }
 
-    @GetMapping("/{cardNumber}")
-    public AccountDTO get(@PathVariable String cardNumber) {
-        return bankService.getAccount(cardNumber);
+    @GetMapping("/{id}")
+    public ResponseEntity<AccountResponseDTO> getAccount(@PathVariable UUID id) {
+        return ResponseEntity.ok(bankService.getAccount(id));
     }
 
-    @PutMapping("/{cardNumber}")
-    public AccountDTO update(@PathVariable String cardNumber, @RequestBody AccountDTO dto) {
-        return bankService.updateAccount(cardNumber, dto);
+    @PostMapping("/login")
+    public ResponseEntity<AccountResponseDTO> login(@Valid @RequestBody AccountLoginDTO dto) {
+        return ResponseEntity.ok(bankService.login(dto));
     }
 
-    @DeleteMapping("/{cardNumber}")
-    public void delete(@PathVariable String cardNumber) {
-        bankService.deleteAccount(cardNumber);
+    @PutMapping("/{id}")
+    public AccountResponseDTO update(@PathVariable UUID id, @RequestBody AccountRequestDTO dto) {
+        return bankService.updateAccount(id, dto);
     }
 
-    @PostMapping("/{cardNumber}/deposit")
-    public void deposit(@PathVariable String cardNumber, @RequestParam BigDecimal amount) {
-        log.info(cardNumber + amount);
-        bankService.deposit(cardNumber, amount);
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable UUID id) {
+        bankService.deleteAccount(id);
     }
 
-    @PostMapping("/{cardNumber}/withdraw")
-    public void withdraw(@PathVariable String cardNumber, @RequestParam BigDecimal amount) {
-        bankService.withdraw(cardNumber, amount);
+    @PostMapping("/deposit")
+    public ResponseEntity<TransactionResponseDTO> deposit(@Valid @RequestBody TransactionRequestDTO dto) {
+        return ResponseEntity.ok(bankService.deposit(dto));
     }
-    @GetMapping("/{cardNumber}/transactions")
-    public Page<TransactionDTO> getTransactions(
-            @PathVariable String cardNumber,
+
+    @PostMapping("/withdraw")
+    public ResponseEntity<TransactionResponseDTO> withdraw(@Valid @RequestBody TransactionRequestDTO dto) {
+        return ResponseEntity.ok(bankService.withdraw(dto));
+    }
+
+    @GetMapping("/{id}/transactions")
+    public Page<TransactionResponseDTO> getTransactions(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size) {
-        return bankService.getTransactionsForAccount(cardNumber, PageRequest.of(page, size));
+            @RequestParam(defaultValue = "5") int size, @PathVariable UUID id) {
+        return bankService.getTransactionsForAccount(id, PageRequest.of(page, size));
     }
 }

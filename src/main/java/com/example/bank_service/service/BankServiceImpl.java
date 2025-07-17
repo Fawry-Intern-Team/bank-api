@@ -1,7 +1,6 @@
 package com.example.bank_service.service;
 
-import com.example.bank_service.dto.AccountDTO;
-import com.example.bank_service.dto.TransactionDTO;
+import com.example.bank_service.dto.*;
 import com.example.bank_service.entity.Account;
 import com.example.bank_service.entity.Transaction;
 import com.example.bank_service.enums.TransactionType;
@@ -13,13 +12,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class BankServiceImpl implements BankService {
 
     private final AccountRepository accountRepository;
@@ -27,86 +27,82 @@ public class BankServiceImpl implements BankService {
     private final AccountMapper accountMapper;
     private final TransactionMapper transactionMapper;
 
+    @Transactional
+    @Override
+    public TransactionResponseDTO deposit(TransactionRequestDTO dto) {
+        Account account = accountRepository.findByCardNumber(dto.getCardNumber()).orElseThrow(() -> new RuntimeException("Account not found"));
+        account.setBalance(account.getBalance().add(dto.getAmount()));
+        Account saved = accountRepository.save(account);
+        Transaction transaction = Transaction.builder()
+                .notes("deposit")
+                .type(TransactionType.DEPOSIT)
+                .account(saved)
+                .amount(dto.getAmount())
+                .build();
+        return transactionMapper.toDto(transactionRepository.save(transaction));
+    }
+
+    @Transactional
+    @Override
+    public TransactionResponseDTO withdraw(TransactionRequestDTO dto) {
+        Account account = accountRepository.findByCardNumber(dto.getCardNumber()).orElseThrow(() -> new RuntimeException("Account not found"));
+        BigDecimal diff = account.getBalance().subtract(dto.getAmount());
+        if (diff.compareTo(BigDecimal.ZERO) < 0) {
+            throw new RuntimeException("Insufficient balance");
+        }
+        account.setBalance(account.getBalance().subtract(dto.getAmount()));
+        Account saved = accountRepository.save(account);
+        Transaction transaction = Transaction.builder()
+                .notes("withdraw")
+                .type(TransactionType.DEPOSIT)
+                .account(saved)
+                .amount(dto.getAmount())
+                .build();
+        return transactionMapper.toDto(transactionRepository.save(transaction));
+    }
 
     @Override
-    public AccountDTO createAccount(AccountDTO dto) {
-        Account account = accountMapper.toEntity(dto);
-        account.setBalance(BigDecimal.ZERO); // default
+    public AccountResponseDTO createAccount(AccountRequestDTO accountRequestDTO) {
+        Account account = accountMapper.toEntity(accountRequestDTO);
         return accountMapper.toDTO(accountRepository.save(account));
     }
 
     @Override
-    public AccountDTO getAccount(String cardNumber) {
-        return accountMapper.toDTO(getAccountOrThrow(cardNumber));
+    public AccountResponseDTO login(AccountLoginDTO dto) {
+        Account account = accountRepository.findByCardNumber(dto.getCardNumber()).orElseThrow(() -> new RuntimeException("Account not found"));
+        if (!account.getPassword().equals(dto.getPassword()))
+            throw new RuntimeException("password invalid");
+        return accountMapper.toDTO(account);
     }
 
     @Override
-    public AccountDTO updateAccount(String cardNumber, AccountDTO dto) {
-        Account acc = getAccountOrThrow(cardNumber);
-        acc.setName(dto.getName());
-        acc.setPassword(dto.getPassword());
-        return accountMapper.toDTO(accountRepository.save(acc));
+    public AccountResponseDTO getAccount(UUID id) {
+        Account account = accountRepository.findById(id).orElseThrow(() -> new RuntimeException("Account not found"));
+        return accountMapper.toDTO(account);
     }
 
     @Override
-    public void deleteAccount(String cardNumber) {
-        accountRepository.deleteById(cardNumber);
+    public AccountResponseDTO updateAccount(UUID id, AccountRequestDTO accountRequestDTO) {
+        Account account = accountMapper.toEntity(accountRequestDTO);
+        account.setId(id);
+        return accountMapper.toDTO(accountRepository.save(account));
     }
 
     @Override
-    public Page<AccountDTO> getAllAccounts(Pageable pageable) {
+    public void deleteAccount(UUID id) {
+        Account account = accountRepository.findById(id).orElseThrow(() -> new RuntimeException("Account not found"));
+        accountRepository.delete(account);
+    }
+
+    @Override
+    public Page<AccountResponseDTO> getAllAccounts(Pageable pageable) {
         return accountRepository.findAll(pageable).map(accountMapper::toDTO);
     }
 
     @Override
-    public void deposit(String cardNumber, BigDecimal amount) {
-        Account acc = getAccountOrThrow(cardNumber);
-        acc.setBalance(acc.getBalance().add(amount));
-        accountRepository.save(acc);
-
-        saveTransaction(acc, amount, TransactionType.DEPOSIT, "Deposit");
+    public Page<TransactionResponseDTO> getTransactionsForAccount(UUID id, Pageable pageable) {
+        Account account = accountRepository.findById(id).orElseThrow(() -> new RuntimeException("Account not found"));
+        return transactionRepository.findByAccount(account, pageable).map(transactionMapper::toDto);
     }
 
-    @Override
-    public void withdraw(String cardNumber, BigDecimal amount) {
-        Account acc = getAccountOrThrow(cardNumber);
-        if (acc.getBalance().compareTo(amount) < 0) {
-            throw new RuntimeException("Insufficient balance");
-        }
-        acc.setBalance(acc.getBalance().subtract(amount));
-        accountRepository.save(acc);
-
-        saveTransaction(acc, amount, TransactionType.WITHDRAWAL, "Withdraw");
-    }
-
-    @Override
-    public void debit(String cardNumber, BigDecimal amount) {
-        withdraw(cardNumber, amount);
-    }
-
-    @Override
-    public void credit(String cardNumber, BigDecimal amount) {
-        deposit(cardNumber, amount);
-    }
-    @Override
-    public Page<TransactionDTO> getTransactionsForAccount(String cardNumber, Pageable pageable) {
-        Account account = getAccountOrThrow(cardNumber);
-        return transactionRepository.findByAccount(account, pageable)
-                .map(transactionMapper::toDto);
-    }
-    private void saveTransaction(Account acc, BigDecimal amount, TransactionType type, String note) {
-        transactionRepository.save(Transaction.builder()
-                .account(acc)
-                .amount(amount)
-                .type(type)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .notes(note)
-                .build());
-    }
-
-    private Account getAccountOrThrow(String cardNumber) {
-        return accountRepository.findById(cardNumber)
-                .orElseThrow(() -> new RuntimeException("Account not found"));
-    }
 }
