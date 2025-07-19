@@ -11,7 +11,6 @@ public interface BankService {
     TransactionResponseDTO deposit(TransactionRequestDTO dto);
     TransactionResponseDTO withdraw(TransactionRequestDTO dto);
     AccountResponseDTO createAccount(AccountRequestDTO accountRequestDTO);
-    AccountResponseDTO login(AccountLoginDTO dto);
     AccountResponseDTO getAccount(UUID id);
     AccountResponseDTO updateAccount(UUID id, AccountRequestDTO accountRequestDTO);
     void deleteAccount(UUID id);

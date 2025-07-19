@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -26,6 +27,7 @@ public class BankController {
         return ResponseEntity.ok(bankService.createAccount(dto));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public Page<AccountResponseDTO> getAllAccounts(
             @RequestParam(defaultValue = "0") int page,
@@ -38,16 +40,12 @@ public class BankController {
         return ResponseEntity.ok(bankService.getAccount(id));
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<AccountResponseDTO> login(@Valid @RequestBody AccountLoginDTO dto) {
-        return ResponseEntity.ok(bankService.login(dto));
-    }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public AccountResponseDTO update(@PathVariable UUID id, @RequestBody AccountRequestDTO dto) {
         return bankService.updateAccount(id, dto);
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public void delete(@PathVariable UUID id) {
         bankService.deleteAccount(id);

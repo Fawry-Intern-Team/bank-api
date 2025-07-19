@@ -10,7 +10,7 @@ public class AccountRequestDTO {
     @NotBlank(message = "Card number is required")
     private String cardNumber;
     @NotBlank(message = "Name is required")
-    private String name;
+    private String cardName;
     @NotBlank(message = "Password is required")
     private String password;
     private BigDecimal balance;

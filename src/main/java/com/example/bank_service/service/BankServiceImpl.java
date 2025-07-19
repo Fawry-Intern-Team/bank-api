@@ -67,13 +67,7 @@ public class BankServiceImpl implements BankService {
         return accountMapper.toDTO(accountRepository.save(account));
     }
 
-    @Override
-    public AccountResponseDTO login(AccountLoginDTO dto) {
-        Account account = accountRepository.findByCardNumber(dto.getCardNumber()).orElseThrow(() -> new RuntimeException("Account not found"));
-        if (!account.getPassword().equals(dto.getPassword()))
-            throw new RuntimeException("password invalid");
-        return accountMapper.toDTO(account);
-    }
+
 
     @Override
     public AccountResponseDTO getAccount(UUID id) {
