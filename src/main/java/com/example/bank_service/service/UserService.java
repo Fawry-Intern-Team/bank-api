@@ -30,13 +30,18 @@ public class UserService implements UserDetailsService {
             rolesList.add(role.getName());
         }
 
-        UserDetails userDetails = org.springframework.security.core.userdetails.
-                User
+        UserDetails userDetails = org.springframework.security.core.userdetails.User
                 .builder()
                 .username(user.getUsername())
                 .password(user.getPassword())
                 .roles(rolesList.toArray(String[]::new))
                 .build();
         return userDetails;
+    }
+
+    public User getUserByUsername(String username) {
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+        if (optionalUser.isEmpty()) throw new UsernameNotFoundException(username);
+        return optionalUser.get();
     }
 }

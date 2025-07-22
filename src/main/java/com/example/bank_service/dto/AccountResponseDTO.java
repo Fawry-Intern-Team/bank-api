@@ -18,5 +18,4 @@ public class AccountResponseDTO {
     private String cardNumber;
     private String cardName;
     private BigDecimal balance;
-    private List<TransactionResponseDTO> transactions;
 }

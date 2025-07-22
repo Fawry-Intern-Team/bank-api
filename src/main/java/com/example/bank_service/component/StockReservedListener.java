@@ -48,6 +48,6 @@ public class StockReservedListener {
 
     @RabbitListener(queues = "bank.order.failed")
     public void onOrderFailed(OrderFailedEvent event) {
-        log.info("❌ Order " + event.getOrderId() + " marked as FAILED. Reason: " + event.getReason());
+        log.info("❌ Order {} marked as FAILED. Reason: {}", event.getOrderId(), event.getReason());
     }
 }

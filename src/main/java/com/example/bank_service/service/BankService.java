@@ -12,6 +12,7 @@ public interface BankService {
     TransactionResponseDTO withdraw(TransactionRequestDTO dto);
     AccountResponseDTO createAccount(AccountRequestDTO accountRequestDTO);
     AccountResponseDTO getAccount(UUID id);
+    AccountResponseDTO getAccountByUsername(String username);
     AccountResponseDTO updateAccount(UUID id, AccountRequestDTO accountRequestDTO);
     void deleteAccount(UUID id);
     Page<AccountResponseDTO> getAllAccounts(Pageable pageable);

@@ -36,8 +36,13 @@ public class BankController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AccountResponseDTO> getAccount(@PathVariable UUID id) {
+    public ResponseEntity<AccountResponseDTO> getAccountById(@PathVariable UUID id) {
         return ResponseEntity.ok(bankService.getAccount(id));
+    }
+
+    @GetMapping("/user/{username}")
+    public ResponseEntity<AccountResponseDTO> getAccountByUsername(@PathVariable String username) {
+        return ResponseEntity.ok(bankService.getAccountByUsername(username));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -45,6 +50,7 @@ public class BankController {
     public AccountResponseDTO update(@PathVariable UUID id, @RequestBody AccountRequestDTO dto) {
         return bankService.updateAccount(id, dto);
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public void delete(@PathVariable UUID id) {

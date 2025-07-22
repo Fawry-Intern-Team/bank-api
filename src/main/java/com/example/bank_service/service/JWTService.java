@@ -5,6 +5,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -24,14 +25,14 @@ public class JWTService {
         List<String> roles = userDetails
                 .getAuthorities()
                 .stream()
-                .map(auth -> auth.getAuthority())
+                .map(GrantedAuthority::getAuthority)
                 .toList();
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
                 .claim("roles", roles)
                 .setIssuedAt(Date.from(Instant.now()))
                 .setExpiration(Date.from(Instant.now().plusMillis(VALIDITY)))
-                .signWith(generateKey(), SignatureAlgorithm.HS256) // Explicit algo
+                .signWith(generateKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 

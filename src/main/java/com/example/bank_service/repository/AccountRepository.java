@@ -1,6 +1,7 @@
 package com.example.bank_service.repository;
 
 import com.example.bank_service.entity.Account;
+import com.example.bank_service.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;

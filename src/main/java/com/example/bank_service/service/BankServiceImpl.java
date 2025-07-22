@@ -26,6 +26,7 @@ public class BankServiceImpl implements BankService {
     private final TransactionRepository transactionRepository;
     private final AccountMapper accountMapper;
     private final TransactionMapper transactionMapper;
+    private final UserService userService;
 
     @Transactional
     @Override
@@ -68,11 +69,15 @@ public class BankServiceImpl implements BankService {
     }
 
 
-
     @Override
     public AccountResponseDTO getAccount(UUID id) {
         Account account = accountRepository.findById(id).orElseThrow(() -> new RuntimeException("Account not found"));
         return accountMapper.toDTO(account);
+    }
+
+    @Override
+    public AccountResponseDTO getAccountByUsername(String username) {
+        return accountMapper.toDTO(userService.getUserByUsername(username).getAccount());
     }
 
     @Override
