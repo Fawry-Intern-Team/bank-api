@@ -1,7 +1,7 @@
 package com.example.bank_service.controller;
 
 import com.example.bank_service.dto.*;
-import com.example.bank_service.service.BankService;
+import com.example.bank_service.service.AccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,16 +11,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/accounts")
 @Slf4j
-public class BankController {
+public class AccountController {
 
-    private final BankService bankService;
+    private final AccountService bankService;
 
     @PostMapping
     public ResponseEntity<AccountResponseDTO> create(@Valid @RequestBody AccountRequestDTO dto) {
@@ -28,11 +27,9 @@ public class BankController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping
-    public Page<AccountResponseDTO> getAllAccounts(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size) {
-        return bankService.getAllAccounts(PageRequest.of(page, size));
+    @PostMapping("/filter")
+    public Page<AccountResponseDTO> filterAccounts(@RequestBody AccountFilterRequest request) {
+        return bankService.filterAccounts(request, PageRequest.of(request.getPage(), request.getSize()));
     }
 
     @GetMapping("/{id}")
@@ -40,14 +37,9 @@ public class BankController {
         return ResponseEntity.ok(bankService.getAccount(id));
     }
 
-    @GetMapping("/user/{username}")
-    public ResponseEntity<AccountResponseDTO> getAccountByUsername(@PathVariable String username) {
-        return ResponseEntity.ok(bankService.getAccountByUsername(username));
-    }
-
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{id}")
-    public AccountResponseDTO update(@PathVariable UUID id, @RequestBody AccountRequestDTO dto) {
+    @PatchMapping("/{id}")
+    public AccountResponseDTO update(@PathVariable UUID id, @Valid @RequestBody AccountUpdateDTO dto) {
         return bankService.updateAccount(id, dto);
     }
 
@@ -57,15 +49,6 @@ public class BankController {
         bankService.deleteAccount(id);
     }
 
-    @PostMapping("/deposit")
-    public ResponseEntity<TransactionResponseDTO> deposit(@Valid @RequestBody TransactionRequestDTO dto) {
-        return ResponseEntity.ok(bankService.deposit(dto));
-    }
-
-    @PostMapping("/withdraw")
-    public ResponseEntity<TransactionResponseDTO> withdraw(@Valid @RequestBody TransactionRequestDTO dto) {
-        return ResponseEntity.ok(bankService.withdraw(dto));
-    }
 
     @GetMapping("/{id}/transactions")
     public Page<TransactionResponseDTO> getTransactions(

@@ -1,5 +1,6 @@
 package com.example.bank_service.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,9 +24,9 @@ public class Account {
     private String cardNumber;
 
     private String cardName;
-
+    private String email;
     private BigDecimal balance;
-
-    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
+    @JsonIgnore
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     private List<Transaction> transactions = new ArrayList<>();
 }

@@ -38,6 +38,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(registry -> {
                     registry.requestMatchers("/api/v1/auth/**").permitAll();
+                    registry.requestMatchers("/api/v1/transactions/**").permitAll();
                     registry.anyRequest().authenticated();
                 })
                 .httpBasic(httpBasic -> httpBasic.realmName("myApp"))

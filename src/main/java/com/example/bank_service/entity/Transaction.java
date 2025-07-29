@@ -1,5 +1,6 @@
 package com.example.bank_service.entity;
 
+import com.example.bank_service.enums.TransactionStatus;
 import com.example.bank_service.enums.TransactionType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -25,7 +26,8 @@ public class Transaction {
     @ManyToOne
     @JoinColumn(name = "account_id")
     private Account account;
-
+    @Column(unique = true, updatable = false)
+    private String idempotencyKey;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -33,8 +35,10 @@ public class Transaction {
     private TransactionType type;
 
     private BigDecimal amount;
-
-    private String notes;
+    @Enumerated(EnumType.STRING)
+    private TransactionStatus status;
+    private String otp;
+    private LocalDateTime expiresAt;
 
     @PreUpdate
     public void preUpdate() {

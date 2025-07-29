@@ -2,6 +2,7 @@ package com.example.bank_service.mapper;
 
 import com.example.bank_service.dto.AccountRequestDTO;
 import com.example.bank_service.dto.AccountResponseDTO;
+import com.example.bank_service.dto.AccountUpdateDTO;
 import com.example.bank_service.entity.Account;
 import org.mapstruct.Mapper;
 

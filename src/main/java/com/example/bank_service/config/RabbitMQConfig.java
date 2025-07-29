@@ -13,30 +13,12 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitMQConfig {
-    public static final String COUPON_APPLIED_QUEUE = "coupon.applied.queue";
-    public static final String PAYMENT_COMPLETED_QUEUE = "payment.completed.queue";
-    public static final String ORDER_FAILED_QUEUE = "bank.order.failed";
-    @Bean
-    public FanoutExchange orderFailedExchange() {
-        return new FanoutExchange("order.failed");
-    }
-    @Bean
-    public Queue orderFailedQueue() {
-        return new Queue(ORDER_FAILED_QUEUE);
-    }
+    public static final String NOTIFICATION_QUEUE = "notification-queue";
+
 
     @Bean
-    public Binding exchangeBinding(FanoutExchange orderFailedExchange) {
-        return BindingBuilder.bind(orderFailedQueue()).to(orderFailedExchange);
-    }
-    @Bean
-    public Queue couponAppliedQueue() {
-        return new Queue(COUPON_APPLIED_QUEUE);
-    }
-
-    @Bean
-    public Queue paymentCompletedQueue() {
-        return new Queue(PAYMENT_COMPLETED_QUEUE);
+    public Queue notificationQueue() {
+        return new Queue(NOTIFICATION_QUEUE);
     }
 
 

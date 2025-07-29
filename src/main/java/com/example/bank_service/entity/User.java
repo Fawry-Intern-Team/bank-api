@@ -32,7 +32,7 @@ public class User {
     )
     private Set<Role> roles = new HashSet<>();
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "account_id")
     private Account account; // can be null if admin
 }

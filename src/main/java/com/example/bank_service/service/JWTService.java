@@ -1,5 +1,6 @@
 package com.example.bank_service.service;
 
+import com.example.bank_service.component.CustomUserDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -21,7 +22,7 @@ public class JWTService {
     private static final String SECRET = "696F68B7A681E887EE8F1AB7A13C9A4367CF9551494656A9A0B28F7C2F93A395";
     private static final long VALIDITY = TimeUnit.MINUTES.toMillis(30);
 
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(CustomUserDetails userDetails) {
         List<String> roles = userDetails
                 .getAuthorities()
                 .stream()
@@ -30,6 +31,7 @@ public class JWTService {
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
                 .claim("roles", roles)
+                .claim("accountId",userDetails.getId())
                 .setIssuedAt(Date.from(Instant.now()))
                 .setExpiration(Date.from(Instant.now().plusMillis(VALIDITY)))
                 .signWith(generateKey(), SignatureAlgorithm.HS256)

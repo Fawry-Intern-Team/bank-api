@@ -1,17 +1,13 @@
 package com.example.bank_service.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder
-public class RegisterResponse {
-
+public class AccountFilterRequest {
     private String cardNumber;
-
     private String cardName;
-
-    private String username;
-    private String email;
+    private int size;
+    private int page;
 }

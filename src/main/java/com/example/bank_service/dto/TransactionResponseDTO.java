@@ -1,5 +1,6 @@
 package com.example.bank_service.dto;
 
+import com.example.bank_service.enums.TransactionStatus;
 import com.example.bank_service.enums.TransactionType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,5 +21,5 @@ public class TransactionResponseDTO {
     private LocalDateTime updatedAt;
     private BigDecimal amount;
     private TransactionType type;
-    private String notes;
+    private TransactionStatus status;
 }

@@ -1,5 +1,6 @@
 package com.example.bank_service.service;
 
+import com.example.bank_service.component.CustomUserDetails;
 import com.example.bank_service.dto.AuthRequest;
 import com.example.bank_service.dto.AuthResponse;
 import com.example.bank_service.dto.RegisterRequest;
@@ -35,7 +36,7 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse login(AuthRequest request) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
         if (authentication.isAuthenticated()) {
-            AuthResponse response = new AuthResponse(jwtService.generateToken(userService.loadUserByUsername(request.getUsername())));
+            AuthResponse response = new AuthResponse(jwtService.generateToken((CustomUserDetails) userService.loadUserByUsername(request.getUsername())));
             return response;
         }
         throw new RuntimeException("invalid credentials");
@@ -47,6 +48,7 @@ public class AuthServiceImpl implements AuthService {
                 .cardNumber(request.getCardNumber())
                 .balance(BigDecimal.ZERO)
                 .cardName(request.getCardName())
+                .email(request.getEmail())
                 .build();
         Account savedAccount = accountRepository.save(account);
         Role role = roleRepository.findByName("USER");
@@ -61,6 +63,7 @@ public class AuthServiceImpl implements AuthService {
                 .cardName(savedAccount.getCardName())
                 .cardNumber(savedAccount.getCardNumber())
                 .username(user.getUsername())
+                .email(savedAccount.getEmail())
                 .build();
     }
 }

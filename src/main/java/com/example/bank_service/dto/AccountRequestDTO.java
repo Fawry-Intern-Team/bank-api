@@ -11,6 +11,8 @@ public class AccountRequestDTO {
     private String cardNumber;
     @NotBlank(message = "Name is required")
     private String cardName;
+    @NotBlank(message = "email is required")
+    private String email;
     @NotBlank(message = "Password is required")
     private String password;
     private BigDecimal balance;
