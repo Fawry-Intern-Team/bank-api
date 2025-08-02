@@ -37,7 +37,8 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public InitiateTransactionResponse initiateTransaction(InitiateTransactionRequest request) {
-        Account account = accountRepository.findByCardNumber(request.getCardNumber()).orElseThrow(() -> new RuntimeException("Account not found"));
+        Account account = accountRepository.findByCardNumber(request.getCardNumber())
+                .orElseThrow(() -> new RuntimeException("Account not found"));
         Optional<Transaction> optionalTransaction = transactionRepository.findByIdempotencyKey(request.getIdempotencyKey());
         Transaction transaction = null;
         if (optionalTransaction.isPresent()) {
